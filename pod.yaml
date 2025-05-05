@@ -1,0 +1,322 @@
+1. SecurityContext
+Use: A securityContext defines security-related settings for the pod or container, such as user/group IDs and file system permissions. It is used to ensure the container runs as a non-root user, and specifies the security policies for containers.
+
+Key Points:
+
+Ensures containers run with least privileges by avoiding running as the root user.
+
+Controls user, group, and file permissions.
+
+Enhances security by defining settings like read-only file systems and privileged containers.
+
+Example:
+
+yaml
+Copy
+Edit
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 3000
+  fsGroup: 2000
+2. Resources (Requests & Limits)
+Use: The resources field in Kubernetes is used to define CPU and memory requirements for containers. It includes requests (the minimum resources needed) and limits (the maximum resources a container can use).
+
+Key Points:
+
+requests: The minimum amount of CPU/memory the container is guaranteed to get.
+
+limits: The maximum amount of CPU/memory the container can use.
+
+Helps Kubernetes in resource allocation and scheduling.
+
+Example:
+
+yaml
+Copy
+Edit
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+  limits:
+    memory: "128Mi"
+    cpu: "500m"
+3. VolumeMounts
+Use: VolumeMounts are used to specify where a volume should be mounted inside the container. It allows containers to access persistent data stored outside the container.
+
+Key Points:
+
+Mounts a volume to a specific path in the container.
+
+Volumes are accessible inside the container at the mounted path.
+
+Used to persist data across pod restarts.
+
+Example:
+
+yaml
+Copy
+Edit
+volumeMounts:
+  - mountPath: /data
+    name: my-volume
+4. Volumes
+Use: A volume is a persistent storage mechanism for storing data in Kubernetes. Volumes are defined at the pod level and can be mounted to containers. Various types of volumes exist, such as emptyDir, hostPath, and PersistentVolumeClaim (PVC).
+
+Key Points:
+
+Volumes provide persistent storage across container restarts.
+
+The volume can be used for sharing data between containers within the same pod.
+
+Various volume types (emptyDir, PVC, hostPath) exist depending on the use case.
+
+Example:
+
+yaml
+Copy
+Edit
+volumes:
+  - name: my-volume
+    emptyDir: {}
+5. ReadinessProbe
+Use: The readinessProbe checks if the container is ready to handle traffic. Kubernetes uses this to determine when a container is ready to accept requests. If the probe fails, traffic will not be sent to the container.
+
+Key Points:
+
+Determines if the container is ready to handle traffic.
+
+Used in conjunction with a Service to route traffic to only healthy pods.
+
+Typically uses HTTP, TCP, or command-based checks.
+
+Example:
+
+yaml
+Copy
+Edit
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 3
+  periodSeconds: 3
+6. LivenessProbe
+Use: The livenessProbe checks if a container is still alive. If it fails, Kubernetes will restart the container to ensure it is healthy.
+
+Key Points:
+
+Used to detect and remedy situations where the container is stuck or unresponsive.
+
+Ensures that unhealthy containers are restarted automatically.
+
+Example:
+
+yaml
+Copy
+Edit
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+7. Environment Variables (env)
+Use: Environment variables (env) provide a way to configure containers at runtime. These variables can include things like API keys, database URLs, or modes (e.g., production or development).
+
+Key Points:
+
+Allows dynamic configuration of containers.
+
+Useful for passing configuration data, like credentials or API keys, without hardcoding them.
+
+Example:
+
+yaml
+Copy
+Edit
+env:
+  - name: DB_URL
+    value: "mysql://localhost:3306/mydb"
+8. RestartPolicy
+Use: The restartPolicy defines how Kubernetes should handle pod restarts when containers within it fail. The three policies are Always, OnFailure, and Never.
+
+Key Points:
+
+Always: The container will always be restarted.
+
+OnFailure: The container will be restarted only if it exits with a non-zero exit code.
+
+Never: The container will never be restarted.
+
+Example:
+
+yaml
+Copy
+Edit
+restartPolicy: Always
+9. Tolerations
+Use: Tolerations allow pods to be scheduled on nodes with "taints". Taints are used to prevent pods from being scheduled on certain nodes unless they have matching tolerations.
+
+Key Points:
+
+Useful for scheduling pods on specific nodes with taints.
+
+Ensures that pods only run on nodes with matching tolerations.
+
+Example:
+
+yaml
+Copy
+Edit
+tolerations:
+  - key: "key"
+    operator: "Equal"
+    value: "value"
+    effect: "NoSchedule"
+10. NodeSelector
+Use: The nodeSelector is used to assign a pod to specific nodes based on node labels. It helps control where pods are deployed.
+
+Key Points:
+
+Allows you to restrict pod scheduling to specific nodes based on labels.
+
+Provides more control over pod placement.
+
+Example:
+
+yaml
+Copy
+Edit
+nodeSelector:
+  disktype: ssd
+11. Affinity / AntiAffinity
+Use: affinity and antiAffinity define advanced rules for pod scheduling. They allow you to control the co-location or isolation of pods based on labels and node characteristics.
+
+Key Points:
+
+Affinity: Ensures that a pod is scheduled on a node that matches certain rules.
+
+AntiAffinity: Ensures that a pod is not scheduled on a node that matches certain rules.
+
+Example:
+
+yaml
+Copy
+Edit
+affinity:
+  podAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: "app"
+              operator: In
+              values:
+                - my-app
+        topologyKey: "kubernetes.io/hostname"
+12. ServiceAccount
+Use: The serviceAccount defines the permissions for the pod to interact with the Kubernetes API or other resources. It binds to a specific service account in the cluster.
+
+Key Points:
+
+Used for securing communication between pods and Kubernetes APIs.
+
+Enables pods to interact with resources, like Secrets or ConfigMaps, based on the assigned role.
+
+Example:
+
+yaml
+Copy
+Edit
+serviceAccountName: my-service-account
+13. TerminationGracePeriodSeconds
+Use: This field defines the duration Kubernetes should wait before forcefully terminating a pod. It provides a grace period for the container to shut down gracefully.
+
+Key Points:
+
+Ensures containers have time to clean up and terminate properly.
+
+If the container does not shut down within this period, it will be forcefully terminated.
+
+Example:
+
+yaml
+Copy
+Edit
+terminationGracePeriodSeconds: 30
+14. DNSPolicy
+Use: The dnsPolicy field specifies how the DNS should be configured for the pod. It determines how the pod resolves domain names.
+
+Key Points:
+
+ClusterFirst: The default policy; DNS queries are resolved using the cluster DNS.
+
+Default: The DNS is inherited from the node's configuration.
+
+None: DNS resolution is not provided.
+
+Example:
+
+yaml
+Copy
+Edit
+dnsPolicy: ClusterFirst
+15. HostAliases
+Use: The hostAliases field allows you to define custom DNS entries in the pod’s /etc/hosts file. It is useful for overriding DNS resolution within the pod.
+
+Key Points:
+
+Allows custom DNS entries for pod network configuration.
+
+Can be used for overriding default DNS settings for specific hosts.
+
+Example:
+
+yaml
+Copy
+Edit
+hostAliases:
+  - ip: "1.2.3.4"
+    hostnames:
+      - "my-custom-host"
+16. ImagePullPolicy
+Use: The imagePullPolicy determines when the container's image should be pulled from the registry. It controls whether the image should always be pulled, pulled if not present, or never pulled.
+
+Key Points:
+
+Always: Pulls the image every time the container is started.
+
+IfNotPresent: Pulls the image only if it is not already present locally.
+
+Never: Never pulls the image, assuming it is already present.
+
+Example:
+
+yaml
+Copy
+Edit
+imagePullPolicy: IfNotPresent
+17. PersistentVolumeClaim (PVC)
+Use: A PersistentVolumeClaim (PVC) is used by a pod to request storage. The PVC binds to a PersistentVolume (PV), which represents actual storage resources in the cluster.
+
+Key Points:
+
+PVC abstracts storage requests from the underlying infrastructure.
+
+PVC allows users to dynamically request and use persistent storage.
+
+Example:
+
+yaml
+Copy
+Edit
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
